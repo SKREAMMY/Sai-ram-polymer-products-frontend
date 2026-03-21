@@ -1,4 +1,4 @@
-import { AttendanceStatus, SalaryStatus } from "../../../types";
+import { type AttendanceStatus, type SalaryStatus } from "../../../types";
 
 type Status = AttendanceStatus | SalaryStatus;
 
