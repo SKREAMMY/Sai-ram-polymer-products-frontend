@@ -6,6 +6,9 @@ import { ROUTES } from "./config/routes";
 import ProtectedRoute from "./shared/components/ProtectedRoute";
 import DashboardLayout from "./layouts/DashboardLayout";
 import LoginPage from "./features/auth/pages/LoginPage";
+import DashboardPage from "./features/dashboard/pages/DashboardPage";
+import EmployeesPage from "./features/employees/pages/EmployeesPage";
+import EmployeeDetailPage from "./features/employees/pages/EmployeeDetailPage";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -18,16 +21,7 @@ const queryClient = new QueryClient({
 });
 
 // Placeholder pages — we'll build these one by one
-const Dashboard = () => (
-  <div className="p-8">
-    <h1 className="text-2xl font-bold text-gray-900">Dashboard</h1>
-  </div>
-);
-const Employees = () => (
-  <div className="p-8">
-    <h1 className="text-2xl font-bold text-gray-900">Employees</h1>
-  </div>
-);
+
 const Attendance = () => (
   <div className="p-8">
     <h1 className="text-2xl font-bold text-gray-900">Attendance</h1>
@@ -53,8 +47,12 @@ export default function App() {
               </ProtectedRoute>
             }
           >
-            <Route path={ROUTES.DASHBOARD} element={<Dashboard />} />
-            <Route path={ROUTES.EMPLOYEES} element={<Employees />} />
+            <Route path={ROUTES.DASHBOARD} element={<DashboardPage />} />
+            <Route path={ROUTES.EMPLOYEES} element={<EmployeesPage />} />
+            <Route
+              path={ROUTES.EMPLOYEE_DETAIL}
+              element={<EmployeeDetailPage />}
+            />
             <Route path={ROUTES.ATTENDANCE_DAILY} element={<Attendance />} />
             <Route path={ROUTES.PAYROLL} element={<Payroll />} />
           </Route>
