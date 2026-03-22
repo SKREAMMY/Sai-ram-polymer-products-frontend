@@ -10,6 +10,7 @@ import DashboardPage from "./features/dashboard/pages/DashboardPage";
 import EmployeesPage from "./features/employees/pages/EmployeesPage";
 import EmployeeDetailPage from "./features/employees/pages/EmployeeDetailPage";
 import DailyAttendancePage from "./features/attendance/pages/DailyAttendacePage";
+import PayrollPage from "./features/payroll/pages/PayrollPage";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -22,12 +23,6 @@ const queryClient = new QueryClient({
 });
 
 // Placeholder pages — we'll build these one by one
-
-const Payroll = () => (
-  <div className="p-8">
-    <h1 className="text-2xl font-bold text-gray-900">Payroll</h1>
-  </div>
-);
 
 export default function App() {
   return (
@@ -53,7 +48,7 @@ export default function App() {
               path={ROUTES.ATTENDANCE_DAILY}
               element={<DailyAttendancePage />}
             />
-            <Route path={ROUTES.PAYROLL} element={<Payroll />} />
+            <Route path={ROUTES.PAYROLL} element={<PayrollPage />} />
           </Route>
 
           <Route

@@ -49,7 +49,7 @@ export function useUpdateAttendance() {
     mutationFn: ({
       id,
       payload,
-      date,
+      
     }: {
       id: string;
       payload: UpdateAttendancePayload;
