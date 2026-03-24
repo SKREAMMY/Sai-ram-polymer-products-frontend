@@ -7,6 +7,8 @@ import {
   Phone,
   Building2,
   ChevronRight,
+  UserMinus,
+  UserCheck,
 } from "lucide-react";
 import {
   useEmployees,
@@ -38,7 +40,9 @@ export default function EmployeesPage() {
   const [search, setSearch] = useState("");
   const [department, setDepartment] = useState("");
   const [showCreate, setShowCreate] = useState(false);
+  const [showInactive, setShowInactive] = useState(false);
   const [editTarget, setEditTarget] = useState<Employee | null>(null);
+  const [toggleTarget, setToggleTarget] = useState<Employee | null>(null);
 
   const { data, isLoading } = useEmployees({
     search: search || undefined,
@@ -48,7 +52,9 @@ export default function EmployeesPage() {
   const createEmployee = useCreateEmployee();
   const updateEmployee = useUpdateEmployee();
 
-  const employees = data?.data ?? [];
+  const employees = (data?.data ?? []).filter(
+    (e) => showInactive || e.is_active,
+  );
 
   const handleCreate = async (payload: CreateEmployeePayload) => {
     await createEmployee.mutateAsync(payload);
@@ -61,6 +67,15 @@ export default function EmployeesPage() {
     setEditTarget(null);
   };
 
+  const handleToggleActive = async () => {
+    if (!toggleTarget) return;
+    await updateEmployee.mutateAsync({
+      id: toggleTarget.id,
+      payload: { is_active: !toggleTarget.is_active },
+    });
+    setToggleTarget(null);
+  };
+
   return (
     <div className="p-8">
       <div className="flex items-center justify-between mb-6">
@@ -70,10 +85,21 @@ export default function EmployeesPage() {
             {data?.total ?? 0} total employees
           </p>
         </div>
-        <Button onClick={() => setShowCreate(true)}>
-          <Plus size={16} />
-          Add employee
-        </Button>
+        <div className="flex items-center gap-3">
+          <label className="flex items-center gap-2 text-sm text-gray-600 cursor-pointer">
+            <input
+              type="checkbox"
+              checked={showInactive}
+              onChange={(e) => setShowInactive(e.target.checked)}
+              className="rounded border-gray-300"
+            />
+            Show inactive
+          </label>
+          <Button onClick={() => setShowCreate(true)}>
+            <Plus size={16} />
+            Add employee
+          </Button>
+        </div>
       </div>
 
       <div className="flex gap-3 mb-5">
@@ -138,8 +164,7 @@ export default function EmployeesPage() {
               <div
                 key={emp.id}
                 onClick={() => navigate(`/employees/${emp.id}`)}
-                className="flex items-center gap-4 px-5 py-4 hover:bg-gray-50
-                           cursor-pointer transition-colors group"
+                className="flex items-center gap-4 px-5 py-4 hover:bg-gray-50 cursor-pointer transition-colors"
               >
                 <div
                   className="w-10 h-10 rounded-full bg-primary-100 flex items-center
@@ -197,15 +222,24 @@ export default function EmployeesPage() {
                       setEditTarget(emp);
                     }}
                     className="px-3 py-1.5 text-xs font-medium text-gray-600 bg-white
-                               border border-gray-200 rounded-lg hover:bg-gray-50
-                               opacity-0 group-hover:opacity-100 transition-all"
+                               border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors"
                   >
                     Edit
                   </button>
-                  <ChevronRight
-                    size={16}
-                    className="text-gray-300 group-hover:text-gray-400"
-                  />
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setToggleTarget(emp);
+                    }}
+                    className={`px-3 py-1.5 text-xs font-medium rounded-lg border transition-colors ${
+                      emp.is_active
+                        ? "text-red-600 bg-white border-red-200 hover:bg-red-50"
+                        : "text-green-600 bg-white border-green-200 hover:bg-green-50"
+                    }`}
+                  >
+                    {emp.is_active ? "Deactivate" : "Reactivate"}
+                  </button>
+                  <ChevronRight size={16} className="text-gray-300" />
                 </div>
               </div>
             ))}
@@ -238,6 +272,61 @@ export default function EmployeesPage() {
           onCancel={() => setEditTarget(null)}
           loading={updateEmployee.isPending}
         />
+      </Modal>
+
+      <Modal
+        open={!!toggleTarget}
+        onClose={() => setToggleTarget(null)}
+        title={
+          toggleTarget?.is_active
+            ? "Deactivate employee"
+            : "Reactivate employee"
+        }
+        size="sm"
+      >
+        <div className="space-y-4">
+          <div className="flex items-center gap-3 p-3 bg-gray-50 rounded-lg">
+            <div className="w-10 h-10 rounded-full bg-primary-100 flex items-center justify-center text-primary-700 font-semibold">
+              {toggleTarget?.full_name.charAt(0).toUpperCase()}
+            </div>
+            <div>
+              <p className="text-sm font-medium text-gray-900">
+                {toggleTarget?.full_name}
+              </p>
+              <p className="text-xs text-gray-500">
+                {toggleTarget?.employee_code} ·{" "}
+                {toggleTarget?.position ?? "No position"}
+              </p>
+            </div>
+          </div>
+
+          <p className="text-sm text-gray-600">
+            {toggleTarget?.is_active
+              ? "This employee will be marked as inactive and removed from the attendance list. All their historical records will be preserved."
+              : "This employee will be reactivated and will appear in the attendance list again."}
+          </p>
+
+          <div className="flex justify-end gap-3">
+            <Button variant="secondary" onClick={() => setToggleTarget(null)}>
+              Cancel
+            </Button>
+            <Button
+              variant={toggleTarget?.is_active ? "danger" : "primary"}
+              loading={updateEmployee.isPending}
+              onClick={handleToggleActive}
+            >
+              {toggleTarget?.is_active ? (
+                <>
+                  <UserMinus size={14} /> Deactivate
+                </>
+              ) : (
+                <>
+                  <UserCheck size={14} /> Reactivate
+                </>
+              )}
+            </Button>
+          </div>
+        </div>
       </Modal>
     </div>
   );
